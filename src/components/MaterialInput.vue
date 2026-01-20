@@ -203,9 +203,12 @@
           <el-divider />
 
           <div class="global-options">
-            <el-checkbox v-model="saveToLibrary">
-              保存本次素材至素材库
+            <el-checkbox v-model="saveToLibrary" disabled>
+              保存本次素材至素材库 (TODO)
             </el-checkbox>
+            <el-tooltip content="功能开发中，敬请期待" placement="top">
+              <el-icon class="todo-icon"><info-filled /></el-icon>
+            </el-tooltip>
           </div>
         </div>
       </el-collapse-item>
@@ -324,7 +327,7 @@
 <script setup lang="ts">
 import { ref, reactive, watch } from 'vue'
 import { ElMessage } from 'element-plus'
-import { UploadFilled, Document, Download, Picture, Delete, Edit, Plus } from '@element-plus/icons-vue'
+import { UploadFilled, Document, Download, Picture, Delete, Edit, Plus, InfoFilled } from '@element-plus/icons-vue'
 import { useDraftStore } from '@/stores/draft'
 import { Product, ReferenceImage } from '@/types'
 import { CATEGORY_OPTIONS, TARGET_AUDIENCE_OPTIONS } from '@/constants'
@@ -710,6 +713,18 @@ function removeReference(id: string) {
 
 .global-options {
   padding: 10px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.global-options .el-checkbox {
+  margin-right: 0;
+}
+
+.todo-icon {
+  color: #909399;
+  cursor: help;
 }
 
 @media screen and (max-width: 768px) {

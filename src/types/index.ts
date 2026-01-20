@@ -40,3 +40,47 @@ export interface TargetAudienceOption {
   label: string
   value: string
 }
+
+export interface Template {
+  id: string
+  name: string
+  tags: string[]
+  thumbnail?: string
+  elements: TemplateElement[]
+  content: {
+    titleTemplate?: string
+    sellingPointsTemplate?: string[]
+    imageStyle?: ImageStyleConfig
+  }
+  createdAt: string
+  usedCount: number
+}
+
+export interface TemplateElement {
+  type: 'mainImage' | 'title' | 'sellingPoints'
+  enabled: boolean
+}
+
+export interface ImageStyleConfig {
+  watermarkText?: string
+  watermarkPosition?: 'top' | 'bottom'
+  backgroundColor?: string
+  fontStyle?: {
+    fontFamily?: string
+    fontSize?: number
+    fontWeight?: string
+    color?: string
+  }
+}
+
+export interface TemplateVariables {
+  name: string
+  brand: string
+  category: string
+  material: string
+  size: string
+  color: string
+  targetAudience: string[]
+  [key: string]: any
+}
+

@@ -20,6 +20,14 @@
           <el-icon><document-copy /></el-icon>
           批量复制文案
         </el-button>
+        <el-button 
+          type="danger" 
+          :disabled="selectedDrafts.length === 0"
+          @click="handleBatchDelete"
+        >
+          <el-icon><delete /></el-icon>
+          批量删除
+        </el-button>
       </div>
     </div>
 
@@ -77,6 +85,18 @@
               <el-icon><edit /></el-icon>
               微调
             </el-button>
+            <el-button size="small" type="warning" @click="handleCollect(draft)">
+              <el-icon><star /></el-icon>
+              收藏
+            </el-button>
+            <el-button 
+              size="small" 
+              type="danger" 
+              @click="handleDeleteDraft(draft)"
+            >
+              <el-icon><delete /></el-icon>
+              删除
+            </el-button>
           </div>
         </div>
       </div>
@@ -130,16 +150,60 @@
         </div>
       </div>
     </el-drawer>
+
+    <el-dialog v-model="collectDialogVisible" title="收藏为模板" width="500px">
+      <el-form :model="collectForm" label-width="100px">
+        <el-form-item label="模板名称" required>
+          <el-input v-model="collectForm.name" placeholder="请输入模板名称" />
+        </el-form-item>
+        <el-form-item label="选择元素">
+          <el-checkbox-group v-model="collectForm.elements">
+            <el-checkbox label="mainImage" value="mainImage">
+              <el-icon><picture /></el-icon> 主图
+            </el-checkbox>
+            <el-checkbox label="title" value="title">
+              <el-icon><document /></el-icon> 标题
+            </el-checkbox>
+            <el-checkbox label="sellingPoints" value="sellingPoints">
+              <el-icon><chat-line-square /></el-icon> 卖点文案
+            </el-checkbox>
+          </el-checkbox-group>
+        </el-form-item>
+        <el-form-item label="标签">
+          <el-select
+            v-model="collectForm.tags"
+            multiple
+            filterable
+            allow-create
+            default-first-option
+            placeholder="请选择或输入标签"
+            style="width: 100%;"
+          >
+            <el-option
+              v-for="tag in commonTags"
+              :key="tag"
+              :label="tag"
+              :value="tag"
+            />
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="collectDialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="saveTemplate">保存模板</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-import { ElMessage } from 'element-plus'
-import { Download, DocumentCopy, Edit, Delete, Plus } from '@element-plus/icons-vue'
+import { ref, computed, reactive } from 'vue'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import { Download, DocumentCopy, Edit, Delete, Plus, Star, Picture, Document, ChatLineSquare } from '@element-plus/icons-vue'
 import { useDraftStore } from '@/stores/draft'
-import { DraftResult } from '@/types'
-import { downloadImage, downloadImagesAsZip, copyTextToClipboard } from '@/utils/file'
+import { DraftResult, Template } from '@/types'
+import { downloadImage, downloadImagesAsZip, copyTextToClipboard, generateId } from '@/utils/file'
+import { createTemplateFromDraft } from '@/utils/template'
 
 const draftStore = useDraftStore()
 
@@ -150,6 +214,16 @@ const previewVisible = ref(false)
 const previewImage = ref('')
 const editDrawerVisible = ref(false)
 const editingDraft = ref<DraftResult | null>(null)
+const collectDialogVisible = ref(false)
+const collectingDraft = ref<DraftResult | null>(null)
+
+const commonTags = ['爆款', '简约', '促销', '节日', '新品', '清仓', '热卖']
+
+const collectForm = reactive({
+  name: '',
+  elements: ['mainImage', 'title', 'sellingPoints'] as string[],
+  tags: [] as string[]
+})
 
 function handleSelectAll(val: boolean) {
   draftStore.selectAllDrafts(val)
@@ -232,6 +306,98 @@ function saveEdit() {
     draftStore.updateDraftResult(editingDraft.value.id, editingDraft.value)
     ElMessage.success('保存成功')
     editDrawerVisible.value = false
+  }
+}
+
+function handleCollect(draft: DraftResult) {
+  collectingDraft.value = draft
+  collectForm.name = ''
+  collectForm.elements = ['mainImage', 'title', 'sellingPoints']
+  collectForm.tags = []
+  collectDialogVisible.value = true
+}
+
+function saveTemplate() {
+  if (!collectForm.name.trim()) {
+    ElMessage.warning('请输入模板名称')
+    return
+  }
+
+  if (collectForm.elements.length === 0) {
+    ElMessage.warning('请至少选择一个元素')
+    return
+  }
+
+  if (!collectingDraft.value) {
+    ElMessage.error('未找到草稿')
+    return
+  }
+
+  const product = draftStore.products.find(p => p.id === collectingDraft.value?.productId)
+  if (!product) {
+    ElMessage.error('未找到关联商品')
+    return
+  }
+
+  const elements: Template['elements'] = collectForm.elements.map(type => ({
+    type: type as 'mainImage' | 'title' | 'sellingPoints',
+    enabled: true
+  }))
+
+  const template = createTemplateFromDraft(
+    collectForm.name,
+    collectForm.tags,
+    elements,
+    collectingDraft.value,
+    product
+  )
+
+  draftStore.addTemplate(template)
+  ElMessage.success('模板收藏成功')
+  collectDialogVisible.value = false
+}
+
+async function handleDeleteDraft(draft: DraftResult) {
+  try {
+    await ElMessageBox.confirm(
+      '确定要删除这个草稿吗？',
+      '删除确认',
+      {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }
+    )
+
+    draftStore.removeDraftResult(draft.id)
+    ElMessage.success('删除成功')
+  } catch {
+    // 用户取消删除
+  }
+}
+
+async function handleBatchDelete() {
+  if (selectedDrafts.value.length === 0) return
+
+  try {
+    await ElMessageBox.confirm(
+      `确定要删除选中的 ${selectedDrafts.value.length} 个草稿吗？`,
+      '批量删除确认',
+      {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }
+    )
+
+    const idsToDelete = selectedDrafts.value.map(d => d.id)
+    idsToDelete.forEach(id => {
+      draftStore.removeDraftResult(id)
+    })
+
+    ElMessage.success(`成功删除 ${idsToDelete.length} 个草稿`)
+  } catch {
+    // 用户取消删除
   }
 }
 </script>

@@ -1,6 +1,8 @@
 import { Product, DraftResult } from '@/types'
 import { SELLING_POINT_TEMPLATES } from '@/constants'
 import { generateId } from './file'
+import { generateTitleWithAI, generateSellingPointsWithAI } from './deepseek'
+import { useDraftStore } from '@/stores/draft'
 
 export async function generateMainImageDraft(
   product: Product,
@@ -88,9 +90,27 @@ export async function generateDraftResult(
   product: Product,
   referenceImages?: string[]
 ): Promise<DraftResult> {
+  const draftStore = useDraftStore()
+  const useAi = draftStore.aiGenerationEnabled
+
   const mainImageDraftUrl = await generateMainImageDraft(product, referenceImages)
-  const title = generateTitle(product)
-  const sellingPoints = generateSellingPoints(product)
+  
+  let title: string
+  let sellingPoints: string[]
+
+  if (useAi) {
+    try {
+      title = await generateTitleWithAI(product)
+      sellingPoints = await generateSellingPointsWithAI(product)
+    } catch (error) {
+      console.warn('AI 生成失败，使用规则生成:', error)
+      title = generateTitle(product)
+      sellingPoints = generateSellingPoints(product)
+    }
+  } else {
+    title = generateTitle(product)
+    sellingPoints = generateSellingPoints(product)
+  }
 
   return {
     id: generateId(),
