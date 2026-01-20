@@ -327,7 +327,7 @@
 <script setup lang="ts">
 import { ref, reactive, watch } from 'vue'
 import { ElMessage } from 'element-plus'
-import { UploadFilled, Document, Download, Picture, Delete, Edit, Plus, InfoFilled } from '@element-plus/icons-vue'
+import { UploadFilled, Download, Delete, Plus } from '@element-plus/icons-vue'
 import { useDraftStore } from '@/stores/draft'
 import { Product, ReferenceImage } from '@/types'
 import { CATEGORY_OPTIONS, TARGET_AUDIENCE_OPTIONS } from '@/constants'

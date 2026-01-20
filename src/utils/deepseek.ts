@@ -134,8 +134,8 @@ export async function generateSellingPointsWithAI(product: Product): Promise<str
 
     const points = content
       .split('\n')
-      .map(p => p.replace(/^\d+\.\s*/, '').trim())
-      .filter(p => p.length > 0)
+      .map((p: string) => p.replace(/^\d+\.\s*/, '').trim())
+      .filter((p: string) => p.length > 0)
       .slice(0, 3)
 
     return points

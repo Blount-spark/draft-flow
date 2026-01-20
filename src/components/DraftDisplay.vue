@@ -64,7 +64,7 @@
 
           <div class="field-group">
             <label>卖点文案</label>
-            <div v-for="(point, index) in draft.sellingPoints" :key="index" class="selling-point">
+            <div v-for="(_, index) in draft.sellingPoints" :key="index" class="selling-point">
               <el-input 
                 v-model="draft.sellingPoints[index]" 
                 @blur="handleDraftUpdate(draft)"
@@ -122,7 +122,7 @@
           </el-form-item>
 
           <el-form-item label="卖点文案">
-            <div v-for="(point, index) in editingDraft.sellingPoints" :key="index" class="selling-point-edit">
+            <div v-for="(_, index) in editingDraft.sellingPoints" :key="index" class="selling-point-edit">
               <el-input 
                 v-model="editingDraft.sellingPoints[index]" 
                 type="textarea"
@@ -199,10 +199,11 @@
 <script setup lang="ts">
 import { ref, computed, reactive } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Download, DocumentCopy, Edit, Delete, Plus, Star, Picture, Document, ChatLineSquare } from '@element-plus/icons-vue'
+import { Download, DocumentCopy, Edit, Delete, Plus, Star, Document, ChatLineSquare } from '@element-plus/icons-vue'
 import { useDraftStore } from '@/stores/draft'
-import { DraftResult, Template } from '@/types'
-import { downloadImage, downloadImagesAsZip, copyTextToClipboard, generateId } from '@/utils/file'
+import type { Template } from '@/types'
+import { DraftResult } from '@/types'
+import { downloadImage, downloadImagesAsZip, copyTextToClipboard } from '@/utils/file'
 import { createTemplateFromDraft } from '@/utils/template'
 
 const draftStore = useDraftStore()

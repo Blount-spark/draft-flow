@@ -146,9 +146,9 @@
 
         <div class="preview-points-section" v-if="previewingTemplate.elements.some(e => e.type === 'sellingPoints' && e.enabled)">
           <h4>卖点文案模板</h4>
-          <div v-for="(point, index) in previewingTemplate.content.sellingPointsTemplate" :key="index" class="point-item">
+          <div v-for="(_, index) in previewingTemplate.content.sellingPointsTemplate" :key="index" class="point-item">
             <span class="point-number">{{ index + 1 }}.</span>
-            <span>{{ point || '使用默认卖点' }}</span>
+            <span>{{ _ || '使用默认卖点' }}</span>
           </div>
           <p class="preview-hint">变量: {{material}}, {{size}}, {{color}}, {{targetAudience}}</p>
         </div>
@@ -191,7 +191,7 @@
         </el-form-item>
 
         <el-form-item label="卖点模板" v-if="editingTemplate.elements.some(e => e.type === 'sellingPoints' && e.enabled)">
-          <div v-for="(point, index) in editForm.sellingPointsTemplate" :key="index" class="point-edit-item">
+          <div v-for="(_, index) in editForm.sellingPointsTemplate" :key="index" class="point-edit-item">
             <el-input 
               v-model="editForm.sellingPointsTemplate[index]"
               :placeholder="`卖点 ${index + 1}`"
@@ -232,7 +232,7 @@
 <script setup lang="ts">
 import { ref, computed, reactive } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Search, View, Check, Delete, Edit, Picture, Document, ChatLineSquare, Plus } from '@element-plus/icons-vue'
+import { Search, Check, Delete, Edit, Document, ChatLineSquare, Plus } from '@element-plus/icons-vue'
 import { useDraftStore } from '@/stores/draft'
 import { Template } from '@/types'
 
@@ -246,6 +246,15 @@ const previewVisible = ref(false)
 const editVisible = ref(false)
 const previewingTemplate = ref<Template | null>(null)
 const editingTemplate = ref<Template | null>(null)
+
+const name = ''
+const brand = ''
+const category = ''
+const audienceText = ''
+const material = ''
+const size = ''
+const color = ''
+const targetAudience = ''
 
 const commonTags = ['爆款', '简约', '促销', '节日', '新品', '清仓', '热卖']
 

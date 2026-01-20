@@ -6,7 +6,7 @@ import { useDraftStore } from '@/stores/draft'
 
 export async function generateMainImageDraft(
   product: Product,
-  referenceImages?: string[]
+  _referenceImages?: string[]
 ): Promise<string> {
   return new Promise((resolve, reject) => {
     const canvas = document.createElement('canvas')

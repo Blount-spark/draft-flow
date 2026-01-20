@@ -72,7 +72,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Delete, Menu, Close } from '@element-plus/icons-vue'
+import { Delete } from '@element-plus/icons-vue'
 import { useDraftStore } from '@/stores/draft'
 import { Product } from '@/types'
 import MaterialInput from '@/components/MaterialInput.vue'
@@ -82,9 +82,6 @@ import OperationPanel from '@/components/OperationPanel.vue'
 const draftStore = useDraftStore()
 
 const products = computed(() => draftStore.products)
-const draftResults = computed(() => draftStore.draftResults)
-const hasProducts = computed(() => products.value.length > 0)
-const hasDrafts = computed(() => draftResults.value.length > 0)
 const operationPanelRef = ref()
 const isMenuOpen = ref(true)
 
